@@ -1,0 +1,24 @@
+services:
+  cb:
+    image: couchbase
+    ports:
+      - "8091-8096:8091-8096"
+      - "11210-11211:11210-11211"
+    healthcheck:
+      test: [ "CMD", "curl", "--fail", "http://localhost:8091/_ui/authMethods" ]
+      interval: 5s
+      timeout: 3s
+      retries: 3
+
+  setup-cb:
+    image: curlimages/curl:latest
+    environment:
+      CB_HOSTNAME: cb
+      CB_BUCKET_NAME: test-bucket
+      CB_SCOPE_NAME: test-scope
+      CB_COLLECTION_NAME: test-collection
+    depends_on:
+      - cb
+    volumes:
+      - ./scripts/setup.sh:/scripts/setup.sh
+    entrypoint: "sh /scripts/setup.sh"
